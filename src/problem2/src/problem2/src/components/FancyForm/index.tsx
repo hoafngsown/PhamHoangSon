@@ -2,6 +2,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
+import BaseLoading from "../Loading";
 import { Button } from "../form/button";
 import Input from "../form/input";
 import { Label } from "../form/label";
@@ -51,6 +52,7 @@ const schema = yup.object().shape({
 });
 
 export default function FancyForm() {
+  const [isLoading, setIsLoading] = useState(false);
   const [currencyOptions, setCurrencyOptions] = useState<Option[]>([]);
 
   const [convertedPrice, setConvertedPrice] = useState<IResult | null>(null);
@@ -65,27 +67,33 @@ export default function FancyForm() {
   const wToCurrency = form.watch("toCurrency");
 
   const onSubmit = (data: IFormCurrency) => {
-    const fromCurrency = JSON.parse(data.fromCurrency);
-    const toCurrency = JSON.parse(data.toCurrency);
+    setIsLoading(true);
 
-    const result = getConvertedPrice(
-      data.amount,
-      fromCurrency.price,
-      toCurrency.price
-    );
+    setTimeout(() => {
+      const fromCurrency = JSON.parse(data.fromCurrency);
+      const toCurrency = JSON.parse(data.toCurrency);
 
-    setConvertedPrice({
-      amount: data.amount,
-      result: result.toString(),
-      fromCurrency: {
-        currency: fromCurrency.currency,
-        icon: getCurrencyImage(data.fromCurrency),
-      },
-      toCurrency: {
-        currency: toCurrency.currency,
-        icon: getCurrencyImage(data.toCurrency),
-      },
-    });
+      const result = getConvertedPrice(
+        data.amount,
+        fromCurrency.price,
+        toCurrency.price
+      );
+
+      setConvertedPrice({
+        amount: data.amount,
+        result: result.toString(),
+        fromCurrency: {
+          currency: fromCurrency.currency,
+          icon: getCurrencyImage(data.fromCurrency),
+        },
+        toCurrency: {
+          currency: toCurrency.currency,
+          icon: getCurrencyImage(data.toCurrency),
+        },
+      });
+
+      setIsLoading(false);
+    }, 1000);
   };
 
   const fetchCurrencyOptions = async () => {
@@ -195,7 +203,14 @@ export default function FancyForm() {
           </div>
 
           <div className="flex items-center justify-center">
-            <Button className="w-[100px]">Convert</Button>
+            <Button className="w-[200px]" disabled={isLoading}>
+              Convert{" "}
+              {isLoading && (
+                <div className="ml-2">
+                  <BaseLoading />
+                </div>
+              )}
+            </Button>
           </div>
         </div>
 
