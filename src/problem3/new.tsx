@@ -8,6 +8,14 @@ interface FormattedWalletBalance {
   formatted: string;
 }
 
+const BLOCKCHAIN_PRIORITY = {
+  OSMOSIS: "Osmosis",
+  ETHEREUM: "Ethereum",
+  ARBITRUM: "Arbitrum",
+  ZILLIQA: "Zilliqa",
+  NEO: "Neo",
+};
+
 interface Props extends BoxProps {}
 const WalletPage: React.FC<Props> = (props: Props) => {
   const { ...rest } = props;
@@ -15,17 +23,17 @@ const WalletPage: React.FC<Props> = (props: Props) => {
   const balances = useWalletBalances();
   const prices = usePrices();
 
-  const getPriority = (blockchain: any): number => {
+  const getPriority = (blockchain: string): number => {
     switch (blockchain) {
-      case "Osmosis":
+      case BLOCKCHAIN_PRIORITY.OSMOSIS:
         return 100;
-      case "Ethereum":
+      case BLOCKCHAIN_PRIORITY.ETHEREUM:
         return 50;
-      case "Arbitrum":
+      case BLOCKCHAIN_PRIORITY.ARBITRUM:
         return 30;
-      case "Zilliqa":
+      case BLOCKCHAIN_PRIORITY.ZILLIQA:
         return 20;
-      case "Neo":
+      case BLOCKCHAIN_PRIORITY.NEO:
         return 20;
       default:
         return -99;
@@ -33,15 +41,16 @@ const WalletPage: React.FC<Props> = (props: Props) => {
   };
 
   const getSortedBalances = (balancesData: WalletBalance[]) => {
-    return balances
+    return balancesData
       .filter((balance: WalletBalance) => {
         const balancePriority = getPriority(balance.blockchain);
         if (balancePriority > -99 && balance.amount <= 0) return true;
         return false;
       })
       .sort(
-        (lhs: WalletBalance, rhs: WalletBalance) =>
-          getPriority(rhs.blockchain) - getPriority(lhs.blockchain)
+        (leftPriority: WalletBalance, rightPriority: WalletBalance) =>
+          getPriority(leftPriority.blockchain) -
+          getPriority(rightPriority.blockchain)
       );
   };
 
